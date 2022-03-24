@@ -25,7 +25,10 @@ window.addEventListener('load', function(){
     ctx.shadowOffsetX = 5;
     ctx.shadowBlur = 10;
    
-
+    const canvas2 = document.getElementById('canvas2');
+    const ctx2 = canvas2.getContext('2d');
+    canvas2.width = window.innerWidth;
+    canvas2.height = window.innerHeight;
 
     class Fractal {
         constructor(canvasWidth, canvasHeight){
@@ -124,12 +127,65 @@ window.addEventListener('load', function(){
 
     const fractal1 = new Fractal(canvas.width, canvas.height);
     fractal1.draw(ctx);
+    const fractalImage = new Image();
+    fractalImage.src = canvas.toDataURL();
+    //converts entire content of canvas into base 64 format
 
     class Particle {
+        //draw individual articles to define the behavior and movement //
+        //to have objects to reset when they fall off screen we have to make them aware of the width and height of the canvas. 
+        constructor(canvasWidth, canvasHeight){
+            this.canvasWidth = canvasWidth;
+            this.canvasHeight = canvasHeight;
+            this.x = Math.random() * this.canvasWidth;
+            this.y = Math.random() * this.canvasHeight;
+            this.width = 50;
+            this.height= 50;
 
+        }
+        update(){
+            this.x++;
+            this.y++;
+            //this moves pixels on horizontal and vertical axis. 
+            //each particle will also have its associated draw method where
+            //we defined some code that will draw this particle at 6 times per second after each position//
+        }
+        draw(context){
+            context.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
 
     class Rain {
+        constructor(canvasWidth, canvasHeight){
+            this.canvasWidth = canvasWidth;
+            this.canvasHeight = canvasHeight; 
+            this.numberOfParticles = 20;
+            this.particles = [];
+            this.#initialize();
+        }
+        //private helper method
+        //fill particles array with 20 particle objects //
+        //initialize can only be called from within this class //
+        #initialize(){
+            for(let i = 0; i < this.numberOfParticles; i++){
+                this.particles.push(new Particle(this.canvasWidth, this.canvasHeight));
+            }
+        }
+        run(context){
+            this.particles.forEach(particle => {
+                particle.draw(context);
+                particle.update();
+            });
+        }
 
     }
+    const rainEffect = new Rain(canvas.width, canvas.height);
+    console.log(rainEffect);
+
+    function animate(){
+        ctx2.clearRect(0,0, canvas2.width, canvas2.height)
+        rainEffect.run(ctx2);
+        requestAnimationFrame(animate);
+    }
+    animate();
 });
